@@ -33,28 +33,29 @@ jobs:
           npm run build
           npx cap sync android
 
-      - name: Upload Gradle Reports on Failure
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: gradle-reports
-          path: frontend/android/app/build/reports/
-
       - name: Build Android APK
         run: |
           cd frontend/android
+          echo "Accepting Android SDK licenses..."
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          echo "Starting Gradle Build..."
+          ./gradlew assembleDebug --stacktrace > gradle-build.log 2>&1 || (cat gradle-build.log && exit 1)
           
-          # Find whatever APK was generated and rename it
           APK_PATH=$(find app/build/outputs/apk/debug/ -name "*.apk" | head -n 1)
           if [ -n "$APK_PATH" ]; then
-            echo "Found APK at $APK_PATH"
             mv "$APK_PATH" app/build/outputs/apk/debug/quanscan.apk
           else
             echo "Error: No APK was generated!"
             exit 1
           fi
+
+      - name: Upload Build Log
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gradle-build-log
+          path: frontend/android/gradle-build.log
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
