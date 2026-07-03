@@ -36,7 +36,6 @@ const PROXY_HEADER = process?.env?.PROXY_HEADER || 'quan-scan-secure-proxy-2024'
 if (!PROXY_HEADER) {
   console.error("Error: Environment variables PROXY_HEADER must be set.");
 }
-}
 
 app.set('trust proxy', 1 /* number of proxies between user and server */);
 
