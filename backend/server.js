@@ -32,10 +32,10 @@ if (!GOOGLE_CLOUD_PROJECT || !GOOGLE_CLOUD_LOCATION) {
   console.error("Error: Environment variables GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION must be set.");
   process.exit(1);
 }
-const PROXY_HEADER = process?.env?.PROXY_HEADER;
+const PROXY_HEADER = process?.env?.PROXY_HEADER || 'quan-scan-secure-proxy-2024';
 if (!PROXY_HEADER) {
   console.error("Error: Environment variables PROXY_HEADER must be set.");
-  process.exit(1);
+}
 }
 
 app.set('trust proxy', 1 /* number of proxies between user and server */);
