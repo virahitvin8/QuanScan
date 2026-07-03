@@ -1,0 +1,28 @@
+{
+  "name": "Quan Scan — AI Quantity Counter",
+  "short_name": "Quan Scan",
+  "description": "AI-powered inventory counting for shopkeepers. Scan any tray, box, or shelf and get an exact count instantly.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f0fdfa",
+  "theme_color": "#00C2A8",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "utilities", "productivity"],
+  "screenshots": [],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
