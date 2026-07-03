@@ -71,7 +71,7 @@ export const analyzeInventoryImage = async (
 
       For each detected item, you must provide:
       1. A specific label (e.g., "Milk Packet 500ml", "Curd Packet 180ml", "Chocolate Bar", "Tomato").
-      2. A bounding box "box_2d" as [ymin, xmin, ymax, xmax] normalized from 0 to 100 (where 0 is top/left and 100 is bottom/right of the image) enclosing that specific individual item.
+      2. A bounding box "box_2d" as [ymin, xmin, ymax, xmax] normalized from 0 to 1000 (where 0 is top/left and 1000 is bottom/right of the image) enclosing that specific individual item.
       3. A confidence level ("high", "medium", "low") based on visibility.
       4. Optional notes about overlapping or occlusion.
 
@@ -127,7 +127,7 @@ export const analyzeInventoryImage = async (
                   box_2d: {
                     type: Type.ARRAY,
                     items: { type: Type.NUMBER },
-                    description: "Bounding box coordinates [ymin, xmin, ymax, xmax] normalized from 0 to 100"
+                    description: "Bounding box coordinates [ymin, xmin, ymax, xmax] normalized from 0 to 1000"
                   },
                   confidence: {
                     type: Type.STRING,
@@ -154,14 +154,19 @@ export const analyzeInventoryImage = async (
 
     const parsed = JSON.parse(resultText);
     
-    const itemsWithIds: DetectedItem[] = (parsed.items || []).map((item: any, index: number) => ({
-      id: `item-${Date.now()}-${index}`,
-      label: item.label || 'Item',
-      count: 1, // Dynamically fill count as 1 since each is an individual item
-      box_2d: item.box_2d || [0, 0, 0, 0],
-      confidence: item.confidence || 'high',
-      notes: item.notes || ''
-    }));
+    const itemsWithIds: DetectedItem[] = (parsed.items || []).map((item: any, index: number) => {
+      const box = item.box_2d || [0, 0, 0, 0];
+      // Convert 0-1000 native scale to 0-100 percentage
+      const normalizedBox = box.map((val: number) => val / 10);
+      return {
+        id: `item-${Date.now()}-${index}`,
+        label: item.label || 'Item',
+        count: 1, // Dynamically fill count as 1 since each is an individual item
+        box_2d: normalizedBox,
+        confidence: item.confidence || 'high',
+        notes: item.notes || ''
+      };
+    });
 
     return {
       sceneDescription: parsed.sceneDescription || 'Inventory items detected.',
