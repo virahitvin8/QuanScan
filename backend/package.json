@@ -6,7 +6,7 @@
   "description": "Node backend for proxying Google Cloud API requests",
   "main": "server.js",
   "scripts": {
-    "start": "node --env-file=.env.local server.js",
+    "start": "if [ -n \"$GOOGLE_CREDENTIALS_JSON\" ]; then echo \"$GOOGLE_CREDENTIALS_JSON\" > google_creds.json; export GOOGLE_APPLICATION_CREDENTIALS=google_creds.json; fi && node server.js",
     "dev": "nodemon --env-file=.env.local server.js"
   },
   "dependencies": {
