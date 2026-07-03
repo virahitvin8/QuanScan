@@ -9,13 +9,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
+    "@google/genai": "latest",
+    "lucide-react": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "@google/genai": "latest",
-    "recharts": "latest",
-    "lucide-react": "latest"
+    "recharts": "latest"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.6.7",
     "@types/node": "latest",
     "@vitejs/plugin-react": "latest",
     "typescript": "latest",
