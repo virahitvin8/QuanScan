@@ -18,35 +18,33 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Setup Java JDK
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: '17'
 
-      - name: Install Root Dependencies
-        run: npm install
-
-      - name: Install Frontend Dependencies & Build
+      - name: Install Dependencies & Build Frontend
         run: |
           cd frontend
           npm install
           npm run build
-
-      - name: Sync Capacitor Android Project
-        run: |
-          cd frontend
           npx cap sync android
 
       - name: Build Android APK
         run: |
           cd frontend/android
-          echo "sdk.dir=$ANDROID_HOME" > local.properties
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon
           mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/quanscan.apk
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: quanscan.apk
+          path: frontend/android/app/build/outputs/apk/debug/quanscan.apk
 
       - name: Create GitHub Release
         id: create_release
