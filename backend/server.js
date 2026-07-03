@@ -18,8 +18,8 @@ app.use(express.json({limit: process?.env?.API_PAYLOAD_MAX_SIZE || "7mb"}));
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-// Serve frontend static files
-app.use(express.static(path.join(__dirname, '..', 'frontend', 'dist')));
+// Serve frontend static files (Disabled since frontend is on GitHub Pages)
+// app.use(express.static(path.join(__dirname, '..', 'frontend', 'dist')));
 
 const PORT = process?.env?.API_BACKEND_PORT || 8080;
 const API_BACKEND_HOST = process?.env?.API_BACKEND_HOST || "0.0.0.0";
@@ -491,7 +491,7 @@ server.on('upgrade', async (request, socket, head) => {
 });
 
 
-// Serve index.html
-app.get(/.*/, (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'frontend', 'dist', 'index.html'));
+// Root endpoint for Render health checks
+app.get('/', (req, res) => {
+  res.status(200).json({ status: 'QuanScan Backend API is running' });
 });
