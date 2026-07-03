@@ -43,16 +43,18 @@ jobs:
       - name: Build Android APK
         run: |
           cd frontend/android
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
           chmod +x gradlew
           ./gradlew assembleDebug
+          mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/quanscan.apk
 
       - name: Create GitHub Release
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
-          name: Quan Scan Latest Release
+          name: Quan Scan App Release
           tag_name: "latest-build-${{ github.run_number }}"
-          files: frontend/android/app/build/outputs/apk/debug/app-debug.apk
+          files: frontend/android/app/build/outputs/apk/debug/quanscan.apk
           make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
