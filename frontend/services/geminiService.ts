@@ -47,8 +47,8 @@ export const analyzeInventoryImage = async (
     };
 
     const categoryContext = customCategoryHint 
-      ? `The user expects to count items related to: "${customCategoryHint}".`
-      : "Identify the primary items in bulk (e.g., milk packets, curd packets, chocolates, sweets, vegetables, cans, etc.).";
+      ? `USER SPECIFICATION: Only count and locate items matching or related to: "${customCategoryHint}". Ignore and do not count any other items in the image.`
+      : `USER SPECIFICATION: No specific item type was entered. You must automatically identify the primary/dominant inventory items in the photo (e.g. milk packets, curd packets, soda cans, bottles, soap boxes, apples) and count all of them.`;
 
     const prompt = `
       You are Quan Scan's high-precision counting engine. A shopkeeper, vendor, store manager,
@@ -59,11 +59,14 @@ export const analyzeInventoryImage = async (
       including items that are stacked, overlapping, or partly hidden, by
       reasoning from visible edges, packaging text, colors, shapes, and shadows.
 
+      ${categoryContext}
+
       CRITICAL ACCURACY & COORDINATE RULES:
       1. DO NOT GENERATE MOCK GRIDS OF BOUNDING BOXES. Every bounding box "box_2d" [ymin, xmin, ymax, xmax] must correspond EXACTLY to the physical contours of an individual item in the photo.
       2. If items are in a crate/tray/box, count them systematically: stack by stack, row by row, column by column. Look at the seams, folded edges, text, and logos to verify where one item ends and another begins. A standard milk packet crate usually holds rows of 5 or 6 packets. Trace the edges to find the exact number (e.g. 12 packets, NOT a random guess of 14).
-      3. Avoid double-counting overlapping items. If a packet is stacked on top of another, trace the boundaries of the top packet and the visible boundaries of the bottom packet separately.
-      4. Verify the final count: perform a mental count and ensure the number of entries in the "items" array is EXACTLY equal to the count of physical items.
+      3. COUNTING JUMBLED, SCATTERED, OR PILED ITEMS: If items are jumbled, scattered, or piled randomly (not in neat rows/columns), you must count them one-by-one by locating their distinct borders. Look at corners, edges, distinct brand logos, barcode areas, print text, packaging seals, and shadows to isolate each item from its neighbors.
+      4. Avoid double-counting overlapping items. If a packet is stacked on top of another, trace the boundaries of the top packet and the visible boundaries of the bottom packet separately.
+      5. Verify the final count: perform a mental count and ensure the number of entries in the "items" array is EXACTLY equal to the count of physical items.
 
       You must locate and return a SEPARATE entry in the "items" list for EVERY SINGLE INDIVIDUAL item visible.
       For example, if there are 12 milk packets on a tray, your "items" array must contain EXACTLY 12 separate entries, each representing a single packet and each having its own specific bounding box "box_2d" enclosing that specific packet.
