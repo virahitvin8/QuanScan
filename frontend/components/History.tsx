@@ -16,6 +16,47 @@ const CONF_DOT: Record<string, string> = {
   low: '#ef4444',
 };
 
+interface GroupedItem {
+  label: string;
+  count: number;
+  confidence: 'high' | 'medium' | 'low';
+  notes?: string;
+}
+
+const getGroupedItems = (items: any[]): GroupedItem[] => {
+  const groups: { [key: string]: { count: number; confs: string[]; notes: string[] } } = {};
+  items.forEach(item => {
+    const label = item.label;
+    if (!groups[label]) {
+      groups[label] = { count: 0, confs: [], notes: [] };
+    }
+    groups[label].count += item.count || 1;
+    if (item.confidence) {
+      groups[label].confs.push(item.confidence);
+    }
+    if (item.notes) {
+      groups[label].notes.push(item.notes);
+    }
+  });
+
+  return Object.keys(groups).map(label => {
+    const confs = groups[label].confs;
+    let confidence: 'high' | 'medium' | 'low' = 'high';
+    if (confs.includes('low')) {
+      confidence = 'low';
+    } else if (confs.includes('medium')) {
+      confidence = 'medium';
+    }
+    const notes = Array.from(new Set(groups[label].notes.filter(Boolean))).join(', ');
+    return {
+      label,
+      count: groups[label].count,
+      confidence,
+      notes: notes || undefined
+    };
+  });
+};
+
 export const History: React.FC<HistoryProps> = ({ scans, onDeleteScan, onClearHistory, onBatchScanCompleted }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -359,7 +400,7 @@ export const History: React.FC<HistoryProps> = ({ scans, onDeleteScan, onClearHi
               <div>
                 <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#123A34] mb-3">Item Breakdown</h4>
                 <div className="space-y-2">
-                  {activeDetailScan.items.map((item, i) => {
+                  {getGroupedItems(activeDetailScan.items).map((item, i) => {
                     const conf = item.confidence || 'high';
                     return (
                       <div

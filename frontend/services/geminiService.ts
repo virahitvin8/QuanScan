@@ -59,34 +59,27 @@ export const analyzeInventoryImage = async (
       including items that are stacked, overlapping, or partly hidden, by
       reasoning from visible edges, packaging text, colors, shapes, and shadows.
 
-      Identify every distinct item TYPE in the photo and count each type
-      separately. Use natural, specific names a shopkeeper would recognize.
+      You must locate and return a SEPARATE entry in the "items" list for EVERY SINGLE INDIVIDUAL item visible.
+      For example, if there are 12 milk packets on a tray, your "items" array must contain EXACTLY 12 separate entries, each representing a single packet and each having its own specific bounding box "box_2d" enclosing that specific packet.
+      DO NOT group them into a single entry with a high count; return 1 entry per item.
 
-      Examples of the level of detail expected:
-      - Vegetable cart: "18 carrots, 6 cabbages, 9 beetroots, 4 pineapples, 25 tomatoes, 14 onions."
-      - Milk/curd tray: "This tray has 32 packets total — 20 milk packets (180ml) and 12 curd packets (500ml)."
-      - Store shelf: "14 salt packets, 22 sugar packets, 10 water bottles, 8 oil packets."
-      - Plant (agronomy): "This rose plant has 46 leaves, 7 buds, 5 open flowers, and is growing in 1 pot."
-
-      For each detected item type, you must provide:
+      For each detected item, you must provide:
       1. A specific label (e.g., "Milk Packet 500ml", "Curd Packet 180ml", "Chocolate Bar", "Tomato").
-      2. The exact count of that item type.
-      3. A bounding box "box_2d" as [ymin, xmin, ymax, xmax] normalized from 0 to 100 (where 0 is top/left and 100 is bottom/right of the image) representing the general area or a key example of this item type.
-      4. A confidence level ("high", "medium", "low") based on visibility and overlapping.
-      5. Optional notes about overlapping or occlusion.
+      2. A bounding box "box_2d" as [ymin, xmin, ymax, xmax] normalized from 0 to 100 (where 0 is top/left and 100 is bottom/right of the image) enclosing that specific individual item.
+      3. A confidence level ("high", "medium", "low") based on visibility.
+      4. Optional notes about overlapping or occlusion.
 
       Respond ONLY with valid JSON in this exact shape, no prose, no markdown fences:
       {
         "sceneDescription": "one short natural sentence summarizing what this photo shows, in the shopkeeper's own terms",
         "detectedCategory": "The general category of items detected (e.g., 'Milk Packets', 'Chocolates', 'Vegetables')",
-        "totalCount": 123,
+        "totalCount": 12,
         "items": [
           {
             "label": "string (specific item name, include size/variant if visible, e.g. '180ml milk packet')",
-            "count": 12,
             "box_2d": [ymin, xmin, ymax, xmax],
             "confidence": "high|medium|low",
-            "notes": "short optional note, e.g. 'a few partly overlapping, counted by visible edges'"
+            "notes": "short optional note, e.g. 'partly overlapping, counted by visible edges'"
           }
         ]
       }
@@ -117,17 +110,13 @@ export const analyzeInventoryImage = async (
             },
             items: {
               type: Type.ARRAY,
-              description: "List of all individual detected item types with their counts and bounding boxes",
+              description: "List of all individual detected items, one entry per physical item",
               items: {
                 type: Type.OBJECT,
                 properties: {
                   label: { 
                     type: Type.STRING, 
                     description: "Specific label/type of the item" 
-                  },
-                  count: {
-                    type: Type.INTEGER,
-                    description: "The exact count of this item type"
                   },
                   box_2d: {
                     type: Type.ARRAY,
@@ -143,7 +132,7 @@ export const analyzeInventoryImage = async (
                     description: "Optional notes about overlapping or occlusion"
                   }
                 },
-                required: ["label", "count", "box_2d"]
+                required: ["label", "box_2d"]
               }
             }
           },
@@ -162,7 +151,7 @@ export const analyzeInventoryImage = async (
     const itemsWithIds: DetectedItem[] = (parsed.items || []).map((item: any, index: number) => ({
       id: `item-${Date.now()}-${index}`,
       label: item.label || 'Item',
-      count: item.count || 1,
+      count: 1, // Dynamically fill count as 1 since each is an individual item
       box_2d: item.box_2d || [0, 0, 0, 0],
       confidence: item.confidence || 'high',
       notes: item.notes || ''
@@ -171,7 +160,7 @@ export const analyzeInventoryImage = async (
     return {
       sceneDescription: parsed.sceneDescription || 'Inventory items detected.',
       detectedCategory: parsed.detectedCategory || 'General Items',
-      totalCount: parsed.totalCount || itemsWithIds.reduce((acc, curr) => acc + curr.count, 0),
+      totalCount: itemsWithIds.length || parsed.totalCount || 0,
       items: itemsWithIds
     };
   } catch (error) {

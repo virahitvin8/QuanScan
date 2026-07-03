@@ -21,6 +21,47 @@ const CONFIDENCE_TAG: Record<string, string> = {
   low: 'bg-rose-500 text-white',
 };
 
+interface GroupedItem {
+  label: string;
+  count: number;
+  confidence: 'high' | 'medium' | 'low';
+  notes?: string;
+}
+
+const getGroupedItems = (items: DetectedItem[]): GroupedItem[] => {
+  const groups: { [key: string]: { count: number; confs: string[]; notes: string[] } } = {};
+  items.forEach(item => {
+    const label = item.label;
+    if (!groups[label]) {
+      groups[label] = { count: 0, confs: [], notes: [] };
+    }
+    groups[label].count += item.count || 1;
+    if (item.confidence) {
+      groups[label].confs.push(item.confidence);
+    }
+    if (item.notes) {
+      groups[label].notes.push(item.notes);
+    }
+  });
+
+  return Object.keys(groups).map(label => {
+    const confs = groups[label].confs;
+    let confidence: 'high' | 'medium' | 'low' = 'high';
+    if (confs.includes('low')) {
+      confidence = 'low';
+    } else if (confs.includes('medium')) {
+      confidence = 'medium';
+    }
+    const notes = Array.from(new Set(groups[label].notes.filter(Boolean))).join(', ');
+    return {
+      label,
+      count: groups[label].count,
+      confidence,
+      notes: notes || undefined
+    };
+  });
+};
+
 export const Scanner: React.FC<ScannerProps> = ({ onScanCompleted }) => {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -35,6 +76,7 @@ export const Scanner: React.FC<ScannerProps> = ({ onScanCompleted }) => {
     items: DetectedItem[];
   } | null>(null);
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
+  const [hoveredLabel, setHoveredLabel] = useState<string | null>(null);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -267,7 +309,7 @@ export const Scanner: React.FC<ScannerProps> = ({ onScanCompleted }) => {
                 if (!item.box_2d) return null;
                 const [ymin, xmin, ymax, xmax] = item.box_2d;
                 const conf = item.confidence || 'high';
-                const isHov = hoveredItemId === item.id;
+                const isHov = hoveredItemId === item.id || hoveredLabel === item.label;
                 return (
                   <div
                     key={item.id}
@@ -281,7 +323,7 @@ export const Scanner: React.FC<ScannerProps> = ({ onScanCompleted }) => {
                       <span
                         className={`absolute -top-7 left-1/2 -translate-x-1/2 px-2.5 py-1 text-[10px] font-bold rounded-lg whitespace-nowrap shadow-xl ${CONFIDENCE_TAG[conf]}`}
                       >
-                        {item.label} × {item.count}
+                        {item.label}
                       </span>
                     )}
                   </div>
@@ -475,14 +517,14 @@ export const Scanner: React.FC<ScannerProps> = ({ onScanCompleted }) => {
               <h4 className="text-xs font-extrabold uppercase tracking-widest text-[#123A34]">Item Breakdown</h4>
             </div>
             <div className="divide-y" style={{ divideColor: '#f0fdfa' }}>
-              {scanResult.items.map((item, i) => {
+              {getGroupedItems(scanResult.items).map((item, i) => {
                 const conf = item.confidence || 'high';
                 return (
                   <div
                     key={i}
                     className="flex items-center px-5 py-4 gap-4 cursor-pointer transition-colors hover:bg-[#f0fdfa]"
-                    onMouseEnter={() => setHoveredItemId(item.id)}
-                    onMouseLeave={() => setHoveredItemId(null)}
+                    onMouseEnter={() => setHoveredLabel(item.label)}
+                    onMouseLeave={() => setHoveredLabel(null)}
                   >
                     <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full ${CONFIDENCE_TAG[conf]}`}>
                       {conf}
