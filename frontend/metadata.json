@@ -1,0 +1,7 @@
+{
+  "name": "Quan Scan",
+  "description": "Futuristic AI-powered quantity and object counting app. Point your camera at anything—milk trays, vegetable carts, store shelves, or plants—and get an exact, category-wise count instantly, even with overlapping items.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

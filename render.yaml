@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: quan-scan-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: GOOGLE_CLOUD_PROJECT
+        value: braided-analyst-500314-c5
+      - key: GOOGLE_CLOUD_LOCATION
+        value: us-central1
+      - key: PROXY_HEADER
+        value: yUykFfiHdO5LVJ3-JqH40qOTN3Dv7IXW
+      - key: SECRET_KEY
+        value: ""
+      - key: API_BACKEND_PORT
+        value: "8080"
+      - key: NODE_ENV
+        value: production
+      - key: GOOGLE_CREDENTIALS_JSON
+        sync: false
