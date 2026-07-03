@@ -8,12 +8,14 @@ import 'dotenv/config';
 import express from 'express';
 import { GoogleAuth } from 'google-auth-library';
 import fetch from 'node-fetch';
+import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import { WebSocketServer, WebSocket } from 'ws';
 import path from 'path';
 import {fileURLToPath} from 'url';
 
 const app = express();
+app.use(cors({ origin: '*' }));
 app.use(express.json({limit: process?.env?.API_PAYLOAD_MAX_SIZE || "7mb"}));
 
 const __filename = fileURLToPath(import.meta.url);

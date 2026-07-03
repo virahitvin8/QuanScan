@@ -74,9 +74,7 @@
       const secretKey = new URLSearchParams(window.location.search).get('key');
       console.log('[Vertex AI Proxy Shim] Intercepted Vertex WebSocket request:', inputUrl);
       const targetUrl = encodeURIComponent(inputUrl);
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const host = window.location.host;
-      const proxyUrl = `${protocol}//${host}/ws-proxy?target=${targetUrl}&key=${secretKey}`;
+      const proxyUrl = `wss://quan-scan-backend.onrender.com/ws-proxy?target=${targetUrl}&key=${secretKey}`;
       return new originalWebSocket(proxyUrl, protocols);
     }
     return new originalWebSocket(url, protocols);
@@ -119,8 +117,8 @@
           body: JSON.stringify(requestDetails),
         };
 
-        console.log('[Vertex AI Proxy Shim] Fetching from local Node.js backend: /api-proxy');
-        const proxyResponse = await fetch('/api-proxy', proxyFetchOptions);
+        console.log('[Vertex AI Proxy Shim] Fetching from backend: https://quan-scan-backend.onrender.com/api-proxy');
+        const proxyResponse = await fetch('https://quan-scan-backend.onrender.com/api-proxy', proxyFetchOptions);
 
         if (proxyResponse.status === 401) {
             console.error('[Vertex Proxy Shim] Local Node.js backend returned 401. Authentication may be needed.');

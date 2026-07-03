@@ -13,8 +13,15 @@ export default defineConfig(({ mode }) => {
       server: {
         proxy: {
           //Target your Node.js backend
-          '/api-proxy': 'http://localhost:8080',
-          '/ws-proxy': {target: 'ws://localhost:8080', ws: true},
+          '/api-proxy': {
+            target: process.env.NODE_ENV === 'production' ? 'https://quan-scan-backend.onrender.com' : 'http://localhost:8080',
+            changeOrigin: true
+          },
+          '/ws-proxy': {
+            target: process.env.NODE_ENV === 'production' ? 'wss://quan-scan-backend.onrender.com' : 'ws://localhost:8080',
+            ws: true,
+            changeOrigin: true
+          },
         },
       },
       plugins: react(),
