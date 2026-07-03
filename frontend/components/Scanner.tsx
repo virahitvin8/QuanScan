@@ -160,6 +160,69 @@ export const Scanner: React.FC<ScannerProps> = ({ onScanCompleted }) => {
 
   return (
     <div className="space-y-5 pb-32 animate-fade-in">
+      {/* Live Camera (Full Screen Overlay) */}
+      {isCameraActive && (
+        <div className="fixed inset-0 bg-black z-50 flex flex-col justify-between">
+          <video
+            ref={videoRef}
+            className="absolute inset-0 w-full h-full object-cover"
+            playsInline muted autoPlay
+          />
+          {/* Overlay */}
+          <div className="absolute inset-0 pointer-events-none z-10">
+            {/* dark edges */}
+            <div className="absolute inset-0 bg-black/40" />
+            {/* Center clear zone */}
+            <div
+              className="absolute"
+              style={{ top: '22%', left: '8%', right: '8%', bottom: '26%', boxShadow: '0 0 0 9999px rgba(0,0,0,0.5)', borderRadius: 24 }}
+            />
+            {/* Corner brackets */}
+            {[
+              'top-[22%] left-[8%] border-t-4 border-l-4 rounded-tl-2xl',
+              'top-[22%] right-[8%] border-t-4 border-r-4 rounded-tr-2xl',
+              'bottom-[26%] left-[8%] border-b-4 border-l-4 rounded-bl-2xl',
+              'bottom-[26%] right-[8%] border-b-4 border-r-4 rounded-br-2xl',
+            ].map((cls, i) => (
+              <div key={i} className={`absolute w-10 h-10 border-[#00C2A8] ${cls}`} />
+            ))}
+            {/* Scan laser line */}
+            <div
+              className="absolute left-[8%] right-[8%] h-[3px] animate-scan-line"
+              style={{
+                top: '22%',
+                background: 'linear-gradient(to right, transparent, #00C2A8, #FF7A59, #00C2A8, transparent)',
+                boxShadow: '0 0 16px #00C2A8',
+              }}
+            />
+            {/* Tip */}
+            <div
+              className="absolute bottom-[28%] left-1/2 -translate-x-1/2 px-5 py-2.5 text-white text-xs font-bold rounded-full backdrop-blur-md"
+              style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.2)', whiteSpace: 'nowrap' }}
+            >
+              📸 Hold phone directly above tray/box
+            </div>
+          </div>
+          {/* Camera controls */}
+          <div className="absolute bottom-10 inset-x-0 flex justify-center items-center gap-10 z-20">
+            <button
+              onClick={stopCamera}
+              className="w-14 h-14 rounded-full flex items-center justify-center text-white active:scale-90 transition-transform"
+              style={{ background: 'rgba(255,255,255,0.2)', border: '1.5px solid rgba(255,255,255,0.3)', backdropFilter: 'blur(12px)' }}
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <button
+              onClick={capturePhoto}
+              className="w-24 h-24 rounded-full flex items-center justify-center active:scale-90 transition-transform"
+              style={{ background: 'white', border: '5px solid #00C2A8', boxShadow: '0 0 32px rgba(0,194,168,0.6)' }}
+            >
+              <div style={{ width: '4rem', height: '4rem', borderRadius: '9999px', background: 'linear-gradient(135deg, #00C2A8, #8C7CFF)' }} />
+            </button>
+            <div className="w-14" /> {/* Spacer to balance Close button */}
+          </div>
+        </div>
+      )}
 
       {/* ── HERO VIEWPORT ─────────────────────────────── */}
       <div
@@ -170,69 +233,6 @@ export const Scanner: React.FC<ScannerProps> = ({ onScanCompleted }) => {
           border: '1.5px solid #ccfbf1',
         }}
       >
-        {/* Live Camera */}
-        {isCameraActive && (
-          <div className="absolute inset-0 bg-black">
-            <video
-              ref={videoRef}
-              className="w-full h-full object-cover"
-              playsInline muted autoPlay
-            />
-            {/* Overlay */}
-            <div className="absolute inset-0 pointer-events-none">
-              {/* dark edges */}
-              <div className="absolute inset-0 bg-black/40" />
-              {/* Center clear zone */}
-              <div
-                className="absolute"
-                style={{ top: '12%', left: '8%', right: '8%', bottom: '20%', boxShadow: '0 0 0 9999px rgba(0,0,0,0.45)', borderRadius: 16 }}
-              />
-              {/* Corner brackets */}
-              {[
-                'top-[12%] left-[8%] border-t-4 border-l-4 rounded-tl-xl',
-                'top-[12%] right-[8%] border-t-4 border-r-4 rounded-tr-xl',
-                'bottom-[20%] left-[8%] border-b-4 border-l-4 rounded-bl-xl',
-                'bottom-[20%] right-[8%] border-b-4 border-r-4 rounded-br-xl',
-              ].map((cls, i) => (
-                <div key={i} className={`absolute w-9 h-9 border-[#00C2A8] ${cls}`} />
-              ))}
-              {/* Scan laser line */}
-              <div
-                className="absolute left-[8%] right-[8%] h-[2px] animate-scan-line"
-                style={{
-                  top: '12%',
-                  background: 'linear-gradient(to right, transparent, #00C2A8, #FF7A59, #00C2A8, transparent)',
-                  boxShadow: '0 0 12px #00C2A8',
-                }}
-              />
-              {/* Tip */}
-              <div
-                className="absolute bottom-[22%] left-1/2 -translate-x-1/2 px-4 py-2 text-white text-xs font-semibold rounded-full backdrop-blur-md"
-                style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.15)', whiteSpace: 'nowrap' }}
-              >
-                📸 Hold phone directly above tray/box
-              </div>
-            </div>
-            {/* Camera controls */}
-            <div className="absolute bottom-6 inset-x-0 flex justify-center items-center gap-10">
-              <button
-                onClick={stopCamera}
-                className="w-11 h-11 rounded-full flex items-center justify-center text-white"
-                style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(12px)' }}
-              >
-                <X className="w-5 h-5" />
-              </button>
-              <button
-                onClick={capturePhoto}
-                className="w-20 h-20 rounded-full flex items-center justify-center active:scale-90 transition-transform"
-                style={{ background: 'white', border: '4px solid #00C2A8', boxShadow: '0 0 24px rgba(0,194,168,0.5)' }}
-              >
-                <div className="w-14 h-14 rounded-full" style={{ background: 'linear-gradient(135deg, #00C2A8, #8C7CFF)' }} />
-              </button>
-              <div className="w-11" />
-            </div>
-          </div>
-        )}
 
         {/* Captured Image + Bounding Boxes */}
         {imageSrc && !isCameraActive && (

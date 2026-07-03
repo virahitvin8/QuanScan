@@ -13,6 +13,7 @@ import rateLimit from 'express-rate-limit';
 import { WebSocketServer, WebSocket } from 'ws';
 import path from 'path';
 import {fileURLToPath} from 'url';
+import fs from 'fs';
 
 const app = express();
 app.use(cors({ origin: '*' }));
@@ -20,8 +21,19 @@ app.use(express.json({limit: process?.env?.API_PAYLOAD_MAX_SIZE || "7mb"}));
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-// Serve frontend static files (Disabled since frontend is on GitHub Pages)
-// app.use(express.static(path.join(__dirname, '..', 'frontend', 'dist')));
+
+// Dynamic credential handling for platforms like Render
+let googleCreds = process.env.GOOGLE_APPLICATION_CREDENTIALS || process.env.GOOGLE_CREDENTIALS_JSON;
+if (googleCreds && googleCreds.trim().startsWith('{')) {
+  try {
+    const tempPath = path.join(__dirname, 'google-credentials.json');
+    fs.writeFileSync(tempPath, googleCreds);
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = tempPath;
+    console.log('[Node Backend] Successfully wrote credentials JSON to file:', tempPath);
+  } catch (err) {
+    console.error('[Node Backend] Failed to write credentials JSON to file:', err);
+  }
+}
 
 const PORT = process?.env?.API_BACKEND_PORT || 8080;
 const API_BACKEND_HOST = process?.env?.API_BACKEND_HOST || "0.0.0.0";
@@ -32,7 +44,7 @@ if (!GOOGLE_CLOUD_PROJECT || !GOOGLE_CLOUD_LOCATION) {
   console.error("Error: Environment variables GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION must be set.");
   process.exit(1);
 }
-const PROXY_HEADER = process?.env?.PROXY_HEADER || 'quan-scan-secure-proxy-2024';
+const PROXY_HEADER = process?.env?.PROXY_HEADER || 'yUykFfiHdO5LVJ3-JqH40qOTN3Dv7IXW';
 if (!PROXY_HEADER) {
   console.error("Error: Environment variables PROXY_HEADER must be set.");
 }
