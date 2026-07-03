@@ -2,6 +2,8 @@ import React, { useState, useRef, useCallback } from 'react';
 import { Camera, Upload, RefreshCw, Check, AlertCircle, Sparkles, X, Info, Crosshair } from 'lucide-react';
 import { analyzeInventoryImage } from '../services/geminiService';
 import { ScanResult, DetectedItem } from '../types';
+import { Capacitor } from '@capacitor/core';
+import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 interface ScannerProps {
   onScanCompleted: (scan: ScanResult) => void;
@@ -52,6 +54,26 @@ export const Scanner: React.FC<ScannerProps> = ({ onScanCompleted }) => {
     setError(null);
     setScanResult(null);
     setIsCameraActive(false);
+
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const image = await CapCamera.getPhoto({
+          quality: 90,
+          allowEditing: false,
+          resultType: CameraResultType.DataUrl,
+          source: CameraSource.Camera
+        });
+        if (image && image.dataUrl) {
+          setImageSrc(image.dataUrl);
+        }
+      } catch (err: any) {
+        // Only set error if it's not the user canceling the native view
+        if (err.message && !err.message.includes('cancelled') && !err.message.includes('canceled')) {
+          setError(`Native camera failed: ${err.message}`);
+        }
+      }
+      return;
+    }
 
     if (!navigator.mediaDevices?.getUserMedia) {
       setError('Camera not supported on this device. Please upload an image.');
