@@ -362,8 +362,9 @@ export const History: React.FC<HistoryProps> = ({ scans, onDeleteScan, onClearHi
             {/* Body */}
             <div className="overflow-y-auto p-5 space-y-5 no-scrollbar">
               {/* Image */}
-              <div className="relative rounded-2xl overflow-hidden" style={{ background: '#f0fdfa', border: '1px solid #ccfbf1' }}>
-                <img src={activeDetailScan.imageUrl} alt={activeDetailScan.title} className="w-full object-contain max-h-56" />
+              <div className="w-full flex justify-center">
+                <div className="relative inline-block max-w-full rounded-2xl overflow-hidden" style={{ border: '1px solid #ccfbf1' }}>
+                  <img src={activeDetailScan.imageUrl} alt={activeDetailScan.title} className="block h-auto max-w-full mx-auto" style={{ maxHeight: 224 }} />
                 {activeDetailScan.items.map(item => {
                   if (!item.box_2d) return null;
                   const [ymin, xmin, ymax, xmax] = item.box_2d;
@@ -376,6 +377,7 @@ export const History: React.FC<HistoryProps> = ({ scans, onDeleteScan, onClearHi
                   );
                 })}
               </div>
+            </div>
 
               {/* Stats */}
               <div className="grid grid-cols-2 gap-3">

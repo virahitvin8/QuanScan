@@ -59,6 +59,12 @@ export const analyzeInventoryImage = async (
       including items that are stacked, overlapping, or partly hidden, by
       reasoning from visible edges, packaging text, colors, shapes, and shadows.
 
+      CRITICAL ACCURACY & COORDINATE RULES:
+      1. DO NOT GENERATE MOCK GRIDS OF BOUNDING BOXES. Every bounding box "box_2d" [ymin, xmin, ymax, xmax] must correspond EXACTLY to the physical contours of an individual item in the photo.
+      2. If items are in a crate/tray/box, count them systematically: stack by stack, row by row, column by column. Look at the seams, folded edges, text, and logos to verify where one item ends and another begins. A standard milk packet crate usually holds rows of 5 or 6 packets. Trace the edges to find the exact number (e.g. 12 packets, NOT a random guess of 14).
+      3. Avoid double-counting overlapping items. If a packet is stacked on top of another, trace the boundaries of the top packet and the visible boundaries of the bottom packet separately.
+      4. Verify the final count: perform a mental count and ensure the number of entries in the "items" array is EXACTLY equal to the count of physical items.
+
       You must locate and return a SEPARATE entry in the "items" list for EVERY SINGLE INDIVIDUAL item visible.
       For example, if there are 12 milk packets on a tray, your "items" array must contain EXACTLY 12 separate entries, each representing a single packet and each having its own specific bounding box "box_2d" enclosing that specific packet.
       DO NOT group them into a single entry with a high count; return 1 entry per item.

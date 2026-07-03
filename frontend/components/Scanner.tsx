@@ -300,9 +300,9 @@ export const Scanner: React.FC<ScannerProps> = ({ onScanCompleted }) => {
 
         {/* Captured Image + Bounding Boxes */}
         {imageSrc && !isCameraActive && (
-          <div className="relative w-full flex flex-col items-center justify-center">
-            <div className="relative w-full" style={{ maxHeight: 480, overflow: 'hidden' }}>
-              <img src={imageSrc} alt="Scan source" className="w-full object-contain" style={{ maxHeight: 480 }} />
+          <div className="relative w-full flex flex-col items-center justify-center p-2">
+            <div className="relative inline-block max-w-full rounded-2xl overflow-hidden" style={{ maxHeight: 480 }}>
+              <img src={imageSrc} alt="Scan source" className="block h-auto max-w-full mx-auto" style={{ maxHeight: 480 }} />
 
               {/* Bounding Boxes */}
               {scanResult?.items.map(item => {
